@@ -13,7 +13,7 @@ public class WeaponManager : MonoBehaviour
     WeaponBase stickPrefab;
 
     Dictionary<WeaponType, WeaponBase> weaponPrefabList;
-    private Dictionary<WeaponType, int> weaponLevels = new Dictionary<WeaponType, int>();
+    Dictionary<WeaponType, int> weaponLevels = new Dictionary<WeaponType, int>();
 
     Dictionary<WeaponType, WeaponBase> weapons = new Dictionary<WeaponType, WeaponBase>();
     Dictionary<WeaponType, WeaponUI> weaponUIs = new Dictionary<WeaponType, WeaponUI>();

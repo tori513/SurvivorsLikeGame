@@ -1,5 +1,4 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,16 +8,10 @@ public class SkillManager : MonoBehaviour
     WeaponManager weaponManager;
 
     [SerializeField]
+    SkillUIElement[] skillElements;
+
+    [SerializeField]
     Button[] buttons;
-
-    [SerializeField]
-    TextMeshProUGUI[] texts;
-
-    [SerializeField]
-    TextMeshProUGUI[] levels;
-
-    [SerializeField]
-    Image[] buttonImages;
 
     [SerializeField]
     Sprite[] weaponSprites;
@@ -27,6 +20,15 @@ public class SkillManager : MonoBehaviour
     AudioClip clip;
 
     bool isFirst = true;
+
+    void OnEnable()
+    {
+        for (int index = 1; index < 4; index++)
+        {
+            SetSkillUI((WeaponType)index);
+        }
+        StartCoroutine(StopTimeRoutine());
+    }
 
     void Start()
     {     
@@ -39,9 +41,10 @@ public class SkillManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    void ShowOptions(WeaponType type)
+    void SetSkillUI(WeaponType type)
     {
         int index = (int)type -1;
+
         string text = "";
 
         switch (type)
@@ -57,28 +60,30 @@ public class SkillManager : MonoBehaviour
             case WeaponType.Stick:
                 text = "에너지 검의 레벨이 증가합니다.";
                 break;               
-        }      
-        texts[index].text = text;
-        levels[index].text = weaponManager.GetWeaponLevel(type).ToString();
-        buttonImages[index].sprite = weaponSprites[(int)type];
-
-        buttons[index].onClick.RemoveAllListeners();
-        buttons[index].onClick.AddListener(() => SetButton(type));
-    }
-
-    void SetButton(WeaponType type)
-    {
-        Time.timeScale = 1f;
-        weaponManager.ActiveWeapon(type);
-        weaponManager.IncreaseWeaponLevel(type);
+        }
 
         int level = weaponManager.GetWeaponLevel(type);
-        int i = (int)type -1 ;
-        levels[i].text = level.ToString();
+
+        skillElements[index].Set(text, weaponSprites[(int)type], level);
+
+        SetButton(index, type);
+    }
+
+    void SetButton(int index, WeaponType type)
+    {
+        buttons[index].onClick.RemoveAllListeners();
+        buttons[index].onClick.AddListener(() => ActiveWeapon(type));
+    }
+
+    void ActiveWeapon(WeaponType type)
+    {
+        CountinueTime();
+        ActiveWeaponManager(type);
+        UpdateWeaponLevel(type);
 
         if (!isFirst)
         {
-            weaponManager.DamageUp(type,1.2f);
+            DamageUp(type);
         }
 
         SoundManager.Instance.PlaySound(clip, 1f);
@@ -87,13 +92,27 @@ public class SkillManager : MonoBehaviour
         GameManager.Instance.CountinueGame();
     }
 
-    private void OnEnable()
+    void CountinueTime()
     {
-        for (int index = 1; index < 4; index++)
-        {
-            ShowOptions((WeaponType)index);
-        }
-        StartCoroutine(StopTimeRoutine());
+        Time.timeScale = 1f;
+    }
+
+    void ActiveWeaponManager(WeaponType type)
+    {
+        weaponManager.ActiveWeapon(type);
+        weaponManager.IncreaseWeaponLevel(type);
+    }
+
+    void UpdateWeaponLevel(WeaponType type)
+    {
+        int level = weaponManager.GetWeaponLevel(type);
+        int i = (int)type - 1;
+        skillElements[i].level.text = level.ToString();
+    }
+
+    void DamageUp(WeaponType type)
+    {
+        weaponManager.DamageUp(type, 1.2f);
     }
 }
 
