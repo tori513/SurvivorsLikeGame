@@ -41,6 +41,11 @@ public class Exp : MonoBehaviour
         }
     }
 
+    public void MoveToPlayer()
+    {
+        transform.position = Vector2.MoveTowards(transform.position, Player.Instance.transform.position, 2.5f * Time.deltaTime);
+    }
+
     IEnumerator CurveRoutine()
     {
         float randomValue = Random.Range(-1.5f, 1.5f);

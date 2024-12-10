@@ -31,10 +31,11 @@ public class EnemyBase : MonoBehaviour
 
     private void Awake()
     {
-        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        animator = GetComponentInChildren<Animator>();
         coll = GetComponent<Collider2D>();
         rigid = GetComponent<Rigidbody2D>();
+
+        animator = GetComponentInChildren<Animator>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         initHp = hp;
     }
@@ -44,6 +45,7 @@ public class EnemyBase : MonoBehaviour
         isDead = false;
         hp = initHp;
         coll.enabled = true;
+
         ChangeColor(Color.white);
     }
 

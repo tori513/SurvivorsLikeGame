@@ -12,17 +12,8 @@ public class WeaponManager : MonoBehaviour
     [SerializeField]
     WeaponBase stickPrefab;
 
-    Dictionary<WeaponType, WeaponBase> weaponPrefabList;
-    Dictionary<WeaponType, int> weaponLevels = new Dictionary<WeaponType, int>();
-
-    Dictionary<WeaponType, WeaponBase> weapons = new Dictionary<WeaponType, WeaponBase>();
-    Dictionary<WeaponType, WeaponUI> weaponUIs = new Dictionary<WeaponType, WeaponUI>();
-    Dictionary<WeaponType, float> weaponDamages = new Dictionary<WeaponType, float>()
-    {
-        { WeaponType.Rocket, 10f },
-        { WeaponType.Shield, 5f },
-        { WeaponType.Stick, 15f },
-    };
+    Dictionary<WeaponType, WeaponData> weaponData = new Dictionary<WeaponType, WeaponData>();
+    Dictionary<WeaponType, WeaponBase> activeWeapons = new Dictionary<WeaponType, WeaponBase>();
 
     [SerializeField]
     Transform shieldTransform;
@@ -42,21 +33,14 @@ public class WeaponManager : MonoBehaviour
 
     void Start()
     {
-        weaponPrefabList = new Dictionary<WeaponType, WeaponBase>()
-        {
-            {WeaponType.Gun,gunPrefab },
-            {WeaponType.Rocket, rocketPrefab},
-            {WeaponType.Shield, shieldPrefab},
-            {WeaponType.Stick, stickPrefab}
-        };
 
-        foreach (WeaponType type in weaponPrefabList.Keys)
+        weaponData = new Dictionary<WeaponType, WeaponData>()
         {
-            if (!weaponLevels.ContainsKey(type))
-            {
-                weaponLevels[type] = 0;
-            }
-        }
+            { WeaponType.Gun, new WeaponData(gunPrefab, weaponUI[0], 0, 0f) },
+            { WeaponType.Rocket, new WeaponData(rocketPrefab, weaponUI[1], 0, 10f) },
+            { WeaponType.Shield, new WeaponData(shieldPrefab, weaponUI[2], 0, 5f) },
+            { WeaponType.Stick, new WeaponData(stickPrefab, weaponUI[3], 0, 15f) }
+        };  
 
         ActiveWeapon(WeaponType.Gun);
         IncreaseWeaponLevel(WeaponType.Gun);
@@ -66,57 +50,57 @@ public class WeaponManager : MonoBehaviour
     {
         if (GameManager.Instance.isStop) return;
 
-        foreach (KeyValuePair<WeaponType, WeaponBase> weapon in weapons)
+        foreach (KeyValuePair<WeaponType, WeaponBase> weaponPair in activeWeapons)
         {
-            WeaponType type = weapon.Key;
-            WeaponBase weapon_ = weapon.Value;
+            WeaponType type = weaponPair.Key;
+            WeaponBase weapon = weaponPair.Value;
 
-            weapon_.WeaponUpdate();
-            float timer = weapon_.GetTimer();
-            float coolTime = weapon_.GetCoolTime();
-            int skillLevel = weaponLevels[type];
+            weapon.WeaponUpdate();
+            float timer = weapon.GetTimer();
+            float coolTime = weapon.GetCoolTime();
+            int level = weaponData[type].level;
 
-            weaponUIs[type].Set(timer, coolTime, skillLevel);
+            weaponData[type].ui.Set(timer, coolTime, level);
         }
     }
 
     public void ActiveWeapon(WeaponType type)
     {
 
-        if (weapons.ContainsKey(type))
+        if (activeWeapons.ContainsKey(type))
             return;
 
+        WeaponData data = weaponData[type];
         WeaponBase weapon = null;
 
         switch (type)
         {
             case WeaponType.Shield:
-                weapon = Instantiate(weaponPrefabList[type], shieldTransform.position, Quaternion.identity);
+                weapon = Instantiate(data.prefab, shieldTransform.position, Quaternion.identity);
                 break;
 
             case WeaponType.Stick:
-                weapon = Instantiate(weaponPrefabList[type], stickTransform.position, Quaternion.identity);
+                weapon = Instantiate(data.prefab, stickTransform.position, Quaternion.identity);
                 break;
 
             default:
-                weapon = Instantiate(weaponPrefabList[type], transform.position, Quaternion.identity);
+                weapon = Instantiate(data.prefab, transform.position, Quaternion.identity);
                 break;
         }
 
         weapon.transform.SetParent(transform);
-        weapons[type] = weapon;
-        weaponUI[(int)type].gameObject.SetActive(true);
-        weaponUIs[type] = weaponUI[(int)type];
+        activeWeapons[type] = weapon;
+        data.ui.gameObject.SetActive(true); 
     }
 
     public void IncreaseWeaponLevel(WeaponType type)
     {
-        weaponLevels[type]++;
+        weaponData[type].level++;
     }
 
     public int GetWeaponLevel(WeaponType type)
     {
-        return weaponLevels[type];
+        return weaponData[type].level;
     }
 
     public void DamageUp(WeaponType type, float damage)

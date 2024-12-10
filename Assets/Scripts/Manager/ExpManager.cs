@@ -21,9 +21,9 @@ public class ExpManager : Singleton<ExpManager>
     [SerializeField]
     float currentScore = 0;
 
-    float maxScore = 70;
+    float maxScore = 100;
 
-    float firstScore = 30f;
+    float firstScore = 60f;
 
     void Start()
     {

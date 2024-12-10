@@ -33,6 +33,8 @@ public class Player : Singleton<Player>
     {
         timer += Time.deltaTime;
         hpBar.SetHpBar(currentHp, initHp);
+
+        Magnetize();
     }
 
     public void TakeDamage(float damage)
@@ -73,6 +75,20 @@ public class Player : Singleton<Player>
     public void SelectSkill()
     {
         playerAnimation.PlaySkillEffect();
+    }
+
+    void Magnetize()
+    {
+        Collider2D[] colls = Physics2D.OverlapCircleAll(transform.position, 0.75f);
+        if (colls.Length == 0) return;
+
+        for(int i = 0; i < colls.Length; i++)
+        {
+            if(colls[i].gameObject.CompareTag("Exp"))
+            {
+                colls[i].GetComponent<Exp>().MoveToPlayer();
+            }           
+        }
     }
 
     public float GetHp()
